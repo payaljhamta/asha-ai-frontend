@@ -14,12 +14,12 @@ export default async function handler(req, res) {
 
     const token = btoa(`${email}:${password}`);
 
-    console.log(api_key, "api_key", token, "token")
+    console.log(api_key, "api_key", token, "token", process.env.BACKEND_URL)
 
     const response = await fetch(process.env.BACKEND_URL, {
       method: "POST",
       headers: {
-        "x-api-key": api_key,
+        "X-Api-Key": api_key,
         token: token,
         "Content-Type": "application/json",
       },
