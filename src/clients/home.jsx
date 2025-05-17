@@ -38,6 +38,19 @@ const ChatMessage = ({ message }) => {
   );
 };
 
+function formatTodaysDate() {
+  const now = new Date();
+  const options = {
+    month: 'long',
+    day: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  };
+  return now.toLocaleString('en-US', options);
+}
+
 export default function HomeClient() {
   const [sessionId] = useState(uuidv4());
   const [input, setInput] = useState("");
@@ -66,6 +79,7 @@ export default function HomeClient() {
       const response = await axios.post("/api/chat", {
         question: input,
         session_id: sessionId,
+        current_date_time: formatTodaysDate()
       });
 
       // Add bot response to chat
