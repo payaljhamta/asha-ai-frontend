@@ -674,8 +674,8 @@ export default function HomeClient() {
       // Fallback static response if AI feedback fails
       const fallbackMessages = {
         'positive': "Thank you for your positive feedback! 😊",
-        'negative': "Thank you for the feedback! I'll work to improve my responses. You can also email us at support@jobsforher.com if you need additional help.",
-        'report': "Thank you for reporting this. We'll review the response and work to improve. For additional support, you can email us at support@jobsforher.com."
+        'negative': "Thank you for the feedback! I'll work to improve my responses.",
+        'report': "Thank you for reporting this. We'll review the response and work to improve."
       };
       
       const fallbackMessage = {
