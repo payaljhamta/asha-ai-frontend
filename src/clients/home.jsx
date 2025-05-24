@@ -222,6 +222,7 @@ const UserProfileDialog = ({ isOpen, onClose, userProfile, onSave }) => {
                 value={loginEmail}
                 onChange={(e) => setLoginEmail(e.target.value)}
                 placeholder="your.email@example.com"
+                required
               />
             </div>
             <div>
@@ -234,6 +235,7 @@ const UserProfileDialog = ({ isOpen, onClose, userProfile, onSave }) => {
                   onChange={(e) => setLoginPassword(e.target.value)}
                   placeholder="Enter your password"
                   className="pr-10"
+                  required
                 />
                 <Button
                   type="button"
@@ -274,16 +276,18 @@ const UserProfileDialog = ({ isOpen, onClose, userProfile, onSave }) => {
                   value={profile.name || ''}
                   onChange={(e) => setProfile(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="Your name"
+                  required
                 />
               </div>
               <div>
-                <Label htmlFor="email">Email (optional)</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   value={profile.email || ''}
                   onChange={(e) => setProfile(prev => ({ ...prev, email: e.target.value }))}
                   placeholder="your.email@example.com"
+                  required
                 />
               </div>
               
@@ -757,37 +761,41 @@ export default function HomeClient() {
   const handleProfileSave = useCallback(async (profile, isLogin = false) => {
     try {
       const isNewProfile = !userProfile; // Check if this is a new profile
-      setUserProfile(profile);
-      localStorage.setItem('asha_user_profile', JSON.stringify(profile));
       
-      // If user provided email, save to backend for session management (only for new profiles)
-      if (profile.email && !isLogin) {
-        const response = await axios.post("/api/create-profile", {
-          ...profile,
-          session_id: sessionId,
-        });
+      if (profile && Object.keys(profile).length > 0) {
+        setUserProfile(profile);
+        localStorage.setItem('asha_user_profile', JSON.stringify(profile));
         
-        if (response.data.success) {
-          console.log('Profile saved successfully');
+        // If user provided email, save to backend for session management (only for new profiles)
+        if (profile.email && !isLogin) {
+          const response = await axios.post("/api/create-profile", {
+            ...profile,
+            session_id: sessionId,
+          });
           
-          // Auto-save chat history for authenticated users
-          if (messages.length > 0) {
-            try {
-              localStorage.setItem(`chat_${sessionId}`, JSON.stringify(messages));
-              console.log('Chat history auto-saved');
-            } catch (chatSaveError) {
-              console.error('Error auto-saving chat:', chatSaveError);
+          if (response.data.success) {
+            console.log('Profile saved successfully');
+            
+            // Auto-save chat history for authenticated users
+            if (messages.length > 0) {
+              try {
+                localStorage.setItem(`chat_${sessionId}`, JSON.stringify(messages));
+                console.log('Chat history auto-saved');
+              } catch (chatSaveError) {
+                console.error('Error auto-saving chat:', chatSaveError);
+              }
             }
           }
         }
+        
+        // Show skill-based job recommendations for new profiles or login with skills
+        if ((isNewProfile || isLogin) && profile.skills && messages.length === 0) {
+          setTimeout(() => {
+            sendSkillBasedJobRecommendations(profile);
+          }, 1500);
+        }
       }
-      
-      // Show skill-based job recommendations for new profiles or login with skills
-      if ((isNewProfile || isLogin) && profile.skills && messages.length === 0) {
-        setTimeout(() => {
-          sendSkillBasedJobRecommendations(profile);
-        }, 1500);
-      }
+
     } catch (error) {
       console.error('Error saving profile:', error);
       // Still keep the profile locally even if backend save fails
