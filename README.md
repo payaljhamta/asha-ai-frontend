@@ -1,4 +1,17 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# ASHA AI Frontend - Women's Career Development Platform
+
+## 🌟 Overview
+
+ASHA AI Frontend is a modern React/Next.js application specifically designed for women's career development and empowerment. Built with cutting-edge web technologies and intuitive UI components, it provides a seamless, responsive interface for accessing AI-powered career guidance, job search, resume analysis, and professional networking opportunities.
+
+## 🚺 Mission Statement
+
+The frontend interface empowers women professionals by delivering:
+- **Intuitive career guidance** through conversational AI interface
+- **Seamless job discovery** with real-time search and filtering
+- **Interactive resume analysis** with drag-and-drop functionality
+- **Professional networking** through mentorship and event discovery
+- **Responsive design** optimized for all devices and accessibility
 
 ## Getting Started
 

@@ -11,12 +11,22 @@ export default async function handler(req, res) {
     const email = process.env.EMAIL;
     const password = process.env.PASSWORD;
     const api_key = process.env.TOKEN;
+    const backend_url = process.env.BACKEND_URL;
+
+    // Check if environment variables are available
+    if (!backend_url) {
+      console.error("BACKEND_URL environment variable is not set");
+      return res
+        .status(500)
+        .json({ status_code: 500, message: "Backend configuration error", data: {} });
+    }
 
     const token = btoa(`${email}:${password}`);
 
-    console.log(api_key, "api_key", token, "token", process.env.BACKEND_URL)
+    console.log("Making request to:", backend_url);
+    console.log("Request body:", body);
 
-    const response = await fetch(process.env.BACKEND_URL, {
+    const response = await fetch(backend_url, {
       method: "POST",
       headers: {
         "X-Api-Key": api_key,
@@ -26,17 +36,32 @@ export default async function handler(req, res) {
       body: JSON.stringify(body),
     });
 
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Backend response error:", response.status, errorText);
+      
+      return res.status(response.status).json({
+        status_code: response.status,
+        message: `Backend error: ${response.statusText}`,
+        data: {},
+      });
+    }
+
     const data = await response.json();
 
     return res.status(response.status).json({
-      status_code: data.status_code,
+      status_code: data.status_code || response.status,
       message: data?.message || "Question answered successfully!",
-      data: data?.data || {},
+      data: data?.data || data || {},
     });
   } catch (error) {
-    console.error("Error in upload-media API:", error);
+    console.error("Error in chat API:", error);
     return res
       .status(500)
-      .json({ status_code: 500, message: "Internal server error", data: {} });
+      .json({ 
+        status_code: 500, 
+        message: "Internal server error: " + error.message, 
+        data: {} 
+      });
   }
 }
