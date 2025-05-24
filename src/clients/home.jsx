@@ -626,6 +626,7 @@ const UserProfileDialog = ({ isOpen, onClose, userProfile, onSave }) => {
   );
 };
 
+
 export default function HomeClient() {
   const [sessionId] = useState(uuidv4());
   const [input, setInput] = useState("");
@@ -834,12 +835,14 @@ export default function HomeClient() {
       const requestData = {
         question: messageText,
         session_id: sessionId,
+
         current_date_time: new Date().toISOString(),
         user_profile: userProfile,
       };
 
       // Call API
       const response = await axios.post("/api/chat", requestData);
+
 
       // Add bot response to chat
       const botMessage = {
