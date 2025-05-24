@@ -91,106 +91,12 @@ const ChatMessage = ({ message, onFeedback, userProfile }) => {
           <ThumbsDown className="size-3 mr-1" />
           Could be better
         </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 text-xs text-violet-600 hover:bg-violet-100 hover:border-violet-200 border border-transparent px-3 transition-all duration-200"
-          onClick={() => onFeedback?.(message.id, 'report')}
-        >
-          <MessageSquarePlus className="size-3 mr-1" />
-          Report issue
-        </Button>
+        
       </div>
     </div>
   );
 };
 
-const ResumeUploadDialog = ({ isOpen, onClose, onUpload }) => {
-  const [uploading, setUploading] = useState(false);
-
-  const onDrop = useCallback(async (acceptedFiles) => {
-    const file = acceptedFiles[0];
-    if (!file) return;
-
-    setUploading(true);
-    try {
-      // Extract text from PDF
-      const formData = new FormData();
-      formData.append('resume', file);
-      
-      // For now, simulate PDF text extraction
-      const mockResumeText = `
-        John Doe
-        Software Engineer
-        Experience: 5 years in full-stack development
-        Skills: React, Node.js, Python, AWS, Machine Learning
-        Education: BS Computer Science
-        
-        Work Experience:
-        - Senior Developer at TechCorp (2021-2024)
-        - Full-stack Developer at StartupXYZ (2019-2021)
-        
-        Projects:
-        - E-commerce platform with React and Node.js
-        - Machine learning model for recommendation system
-      `;
-      
-      onUpload(mockResumeText);
-      onClose();
-    } catch (error) {
-      console.error('Error uploading resume:', error);
-    } finally {
-      setUploading(false);
-    }
-  }, [onUpload, onClose]);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      'application/pdf': ['.pdf']
-    },
-    maxFiles: 1
-  });
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-violet-700">Upload Your Resume</DialogTitle>
-          <DialogDescription>
-            Upload your resume in PDF format and I'll analyze it to find the best job matches for you.
-          </DialogDescription>
-        </DialogHeader>
-        <div
-          {...getRootProps()}
-          className={cn(
-            "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors",
-            isDragActive 
-              ? "border-violet-400 bg-violet-50" 
-              : "border-violet-300 hover:border-violet-400 hover:bg-violet-50"
-          )}
-        >
-          <input {...getInputProps()} />
-          <Upload className="mx-auto h-12 w-12 text-violet-400 mb-4" />
-          {isDragActive ? (
-            <p className="text-violet-600">Drop your resume here...</p>
-          ) : (
-            <div>
-              <p className="text-violet-600 font-medium">Click to upload or drag and drop</p>
-              <p className="text-sm text-gray-500 mt-2">PDF files only (max 10MB)</p>
-            </div>
-          )}
-        </div>
-        {uploading && (
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-500 mx-auto"></div>
-            <p className="text-sm text-violet-600 mt-2">Analyzing your resume...</p>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
-  );
-};
 
 const UserProfileDialog = ({ isOpen, onClose, userProfile, onSave }) => {
   const [profile, setProfile] = useState(userProfile || {});
@@ -206,28 +112,6 @@ const UserProfileDialog = ({ isOpen, onClose, userProfile, onSave }) => {
   const [errorModal, setErrorModal] = useState({ show: false, title: '', message: '' });
   const [successModal, setSuccessModal] = useState({ show: false, title: '', message: '' });
 
-  const checkEmailExists = async (email) => {
-    if (!email.trim()) return false;
-    
-    setEmailCheckLoading(true);
-    try {
-      // Try to login with a dummy password to check if email exists
-      const response = await axios.post('/api/user-login', {
-        email: email,
-        password: 'dummy_check_password'
-      });
-      return false; // If no error, email doesn't exist
-    } catch (error) {
-      if (error.response?.status === 404) {
-        return false; // Email doesn't exist
-      } else if (error.response?.status === 401) {
-        return true; // Email exists but wrong password
-      }
-      return false; // Other errors, assume email doesn't exist
-    } finally {
-      setEmailCheckLoading(false);
-    }
-  };
 
   const handleSave = async () => {
     // Validate password if provided
@@ -246,15 +130,6 @@ const UserProfileDialog = ({ isOpen, onClose, userProfile, onSave }) => {
           title: 'Password Too Short',
           message: 'Password must be at least 6 characters long for security.'
         });
-        return;
-      }
-    }
-    
-    // Check if email already exists before creating profile
-    if (profile.email && !userProfile) {
-      const emailExists = await checkEmailExists(profile.email);
-      if (emailExists) {
-        setShowEmailExistsModal(true);
         return;
       }
     }
@@ -410,9 +285,6 @@ const UserProfileDialog = ({ isOpen, onClose, userProfile, onSave }) => {
                   onChange={(e) => setProfile(prev => ({ ...prev, email: e.target.value }))}
                   placeholder="your.email@example.com"
                 />
-                <p className="text-xs text-violet-600 mt-1">
-                  Providing email will save your conversation history
-                </p>
               </div>
               
               {profile.email && !userProfile && !isLoggedIn && (
@@ -424,7 +296,7 @@ const UserProfileDialog = ({ isOpen, onClose, userProfile, onSave }) => {
                         id="password"
                         type={showPassword ? "text" : "password"}
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        onChange={(e) => setPassword(e?.value)}
                         placeholder="Create a secure password"
                         className="pr-10"
                       />
@@ -472,11 +344,7 @@ const UserProfileDialog = ({ isOpen, onClose, userProfile, onSave }) => {
                   className="w-full p-2 border border-gray-300 rounded-md"
                   required
                 >
-                  <option value="">Please select your gender</option>
                   <option value="woman">Woman</option>
-                  <option value="non-binary">Non-binary</option>
-                  <option value="prefer-not-to-say">Prefer not to say</option>
-                  <option value="other">Other</option>
                 </select>
                 <p className="text-xs text-violet-600 mt-1">
                   This platform is designed specifically for women's career empowerment
@@ -885,41 +753,7 @@ export default function HomeClient() {
     [sendMessage]
   );
 
-  const handleResumeUpload = useCallback(async (resumeText) => {
-    try {
-      setIsLoading(true);
-      
-      // Send resume for analysis
-      const response = await axios.post("/api/chat", {
-        question: `Please analyze my resume and find matching job opportunities: ${resumeText}`,
-        session_id: sessionId,
-        current_date_time: new Date().toISOString(),
-        user_profile: userProfile,
-      });
-
-      const botMessage = {
-        id: uuidv4(),
-        text: response.data?.data.message,
-        sender: "bot",
-      };
-      setMessages((prev) => [...prev, botMessage]);
-
-      if (response.data?.data?.related_questions) {
-        setFollowupQuestions(response.data?.data.related_questions);
-      }
-    } catch (error) {
-      console.error("Error analyzing resume:", error);
-      const errorMessage = {
-        id: uuidv4(),
-        text: "I encountered an issue analyzing your resume. Please try uploading it again or contact support.",
-        sender: "bot",
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [sessionId, userProfile]);
-
+ 
   const handleProfileSave = useCallback(async (profile, isLogin = false) => {
     try {
       const isNewProfile = !userProfile; // Check if this is a new profile
@@ -1001,21 +835,14 @@ export default function HomeClient() {
                     <Users className="mr-2 size-4" />
                     Set Up Profile
                   </Button>
-                  <Button
-                    onClick={() => setShowResumeDialog(true)}
-                    variant="outline"
-                    className="border-rose-300 text-rose-700 hover:bg-rose-50"
-                  >
-                    <FileText className="mr-2 size-4" />
-                    Upload Resume
-                  </Button>
+               
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-xl">
                   <SuggestionButton
-                    text="Find jobs for my skills"
+                    text="Resume Tips & Best Practices"
                     icon={<Star className="size-4" />}
-                    onClick={() => selectFollowupQuestion("Find jobs that match my skills and experience")}
+                    onClick={() => selectFollowupQuestion("Resume Tips & Best Practices")}
                   />
                   <SuggestionButton
                     text="Discover career events"
@@ -1094,16 +921,8 @@ export default function HomeClient() {
                   className="border-violet-200 focus:border-violet-400 pr-20 h-11 rounded-xl"
                 />
                 <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex gap-1">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowResumeDialog(true)}
-                    className="text-violet-600 hover:bg-violet-50 p-1 h-8 w-8 rounded-lg"
-                    title="Upload Resume"
-                  >
-                    <Upload className="size-4" />
-                  </Button>
+              
+
                   <Button
                     type="button"
                     variant="ghost"
@@ -1155,39 +974,7 @@ export default function HomeClient() {
                     <Settings className="mr-2 size-4" />
                     Profile Settings
                   </Button>
-                  {/* <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setShowResumeDialog(true);
-                      setShowChatOptions(false);
-                    }}
-                    className="w-full justify-start text-violet-700 hover:bg-violet-50"
-                  >
-                    <FileText className="mr-2 size-4" />
-                    Upload Resume
-                  </Button> */}
-                  {userProfile?.email && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        // Save chat functionality
-                        localStorage.setItem(`chat_${sessionId}`, JSON.stringify(messages));
-                        setNotificationModal({
-                          show: true,
-                          title: 'Chat Saved',
-                          message: 'Your conversation has been saved successfully!',
-                          type: 'success'
-                        });
-                        setShowChatOptions(false);
-                      }}
-                      className="w-full justify-start text-violet-700 hover:bg-violet-50"
-                    >
-                      <Save className="mr-2 size-4" />
-                      Save Chat
-                    </Button>
-                  )}
+                 
                 </div>
               </div>
             )}
@@ -1195,15 +982,7 @@ export default function HomeClient() {
         </div>
       </div>
 
-      {/* Dialogs */}
-      <ResumeUploadDialog
-        isOpen={showResumeDialog}
-        onClose={() => {
-          setShowResumeDialog(false);
-          focusInput();
-        }}
-        onUpload={handleResumeUpload}
-      />
+      
       
       <UserProfileDialog
         isOpen={showProfileDialog}

@@ -23,10 +23,8 @@ export default async function handler(req, res) {
 
     const token = btoa(`${email}:${password}`);
 
-    console.log("Making request to:", backend_url);
-    console.log("Request body:", body);
 
-    const response = await fetch(backend_url, {
+    const response = await fetch(`${backend_url}/chat`, {
       method: "POST",
       headers: {
         "X-Api-Key": api_key,
