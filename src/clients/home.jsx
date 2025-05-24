@@ -44,7 +44,7 @@ const ChatMessage = ({ message, onFeedback, userProfile }) => {
             <Sparkles className="size-3" />
           </AvatarFallback>
         </Avatar>
-        <div className="p-3 rounded-2xl text-md max-w-[80%] bg-gradient-to-r from-violet-50 to-rose-50 border border-violet-200 shadow-sm">
+        <div className="p-3 rounded-2xl text-sm max-w-[80%] bg-gradient-to-r from-violet-50 to-rose-50 border border-violet-200 shadow-sm">
           <div className="break-words">
             <Markdown
               components={{
